@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CurrencyConversionService {
-    public static int INVALID_VALUE = -1;
+    private static int INVALID_VALUE = 0;
 
     private final HnbCommunicator hnbCommunicator;
 

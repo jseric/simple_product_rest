@@ -65,10 +65,7 @@ public class ProductService {
 
         // Fetch price in EUR currency
         log.info("Converting price in HRK to EUR");
-        BigDecimal priceEur = currencyConversionService.convertHrkToEur(requestData.getPriceHrk());
-        if (priceEur.intValue() == currencyConversionService.INVALID_VALUE) {
-            // FIXME should product with eur = -1 be saved or dumped?
-        }
+        final BigDecimal priceEur = currencyConversionService.convertHrkToEur(requestData.getPriceHrk());
 
         // Create new Product
         Product product = new Product(
