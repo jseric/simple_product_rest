@@ -8,6 +8,7 @@ import com.jseric.simple_product_rest.repository.ProductRepository;
 import com.jseric.simple_product_rest.service.hnb.CurrencyConversionService;
 import com.jseric.simple_product_rest.service.validation.ProductValidationService;
 import java.math.BigDecimal;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,85 @@ public class ProductService {
         } catch (final Exception e) {
             log.error("Error ocurred while saving product: " + e.getMessage());
             rspBody.setErrorMessage("product was not saved");
+            return rspBody;
+        }
+
+        rspBody.setProduct(new ProductWrapper(product));
+        return rspBody;
+    }
+
+    /**
+     * Update existing Product
+     * @param productId Product ID (in {@link java.lang.String} format)
+     * @param reqBody {@link com.jseric.simple_product_rest.model.fe.CreateProductRequest}
+     * @return {@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}
+     */
+    public CreateProductResponse updateProduct(final String productId, final CreateProductRequest reqBody) {
+        final CreateProductResponse rspBody = new CreateProductResponse();
+
+        if (reqBody == null || reqBody.getProduct() == null) {
+            log.error("Request body is empty!");
+            rspBody.setErrorMessage("request body is empty");
+            return rspBody;
+        }
+        final ProductWrapper requestData = reqBody.getProduct();
+
+        Long id = null;
+        try {
+            id = Long.parseLong(productId);
+        } catch (final NumberFormatException e) {
+            log.error("productId is not a number!");
+            rspBody.setErrorMessage("invalid productId");
+            return rspBody;
+        }
+
+        // Validate data
+        log.info("Validating Product data");
+        final String errorMessage = productValidationService.validateCreateNewProductRequest(requestData);
+        if (!errorMessage.isEmpty()) {
+            log.info("Data validation failed. Errors exist.");
+            log.trace("errorMessage :: " + errorMessage);
+            rspBody.setErrorMessage(errorMessage);
+            return rspBody;
+        }
+
+        // Check that code is unique (i.e. it doesn't already exist in system)
+        log.info("Validating code uniqueness");
+        if (productRepository.doesExistByCode(requestData.getCode(), id)) {
+            log.info("Code is not unique. Another object with same code field was found");
+            rspBody.setErrorMessage("another object with same code field already exists in system;");
+            return rspBody;
+        }
+
+        // Fetch price in EUR currency
+        log.info("Converting price in HRK to EUR");
+        final BigDecimal priceEur = currencyConversionService.convertHrkToEur(requestData.getPriceHrk());
+
+        // Fetch product
+        final Optional<Product> productOptional = productRepository.findById(id);
+        if (!productOptional.isPresent()) {
+            log.warn("Product with ID not found");
+            rspBody.setErrorMessage("product was not found");
+            return rspBody;
+        }
+
+        // Update product data
+        Product product = productOptional.get();
+        product.setCode(requestData.getCode());
+        product.setName(requestData.getName());
+        product.setPriceHrk(requestData.getPriceHrk());
+        product.setPriceEur(priceEur);
+        product.setDescription(requestData.getDescription());
+        product.setIsAvailable(requestData.getIsAvailable());
+
+
+        // Save product
+        try {
+            log.info("Saving updated product");
+            product = productRepository.save(product);
+        } catch (final Exception e) {
+            log.error("Error ocurred while updating product: " + e.getMessage());
+            rspBody.setErrorMessage("updated product was not saved");
             return rspBody;
         }
 
