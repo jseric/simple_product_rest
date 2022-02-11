@@ -32,7 +32,7 @@ public class ProductService {
 
     /**
      * Create and save new Product
-     * @param reqBody {@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}
+     * @param reqBody {@link com.jseric.simple_product_rest.model.fe.CreateProductRequest}
      * @return {@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}
      */
     public CreateProductResponse createNewProduct(final CreateProductRequest reqBody) {
