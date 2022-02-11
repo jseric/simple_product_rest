@@ -1,5 +1,6 @@
 package com.jseric.simple_product_rest.model.fe;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
@@ -19,5 +20,6 @@ public class CreateProductResponse implements Serializable {
     private ProductWrapper product;
 
     @JsonProperty("errorMessage")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String errorMessage;
 }
