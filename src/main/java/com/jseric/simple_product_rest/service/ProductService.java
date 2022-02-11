@@ -57,7 +57,7 @@ public class ProductService {
 
         // Check that code is unique (i.e. it doesn't already exist in system)
         log.info("Validating code uniqueness");
-        if (productRepository.countByCode(requestData.getCode()) != 0) {
+        if (productRepository.doesExistByCode(requestData.getCode())) {
             log.info("Code is not unique. Another object with same code field was found");
             rspBody.setErrorMessage("another object with same code field already exists in system;");
             return rspBody;
@@ -82,7 +82,7 @@ public class ProductService {
             product = productRepository.save(product);
         } catch (final Exception e) {
             log.error("Error ocurred while saving product: " + e.getMessage());
-            rspBody.setErrorMessage("Product was not saved");
+            rspBody.setErrorMessage("product was not saved");
             return rspBody;
         }
 

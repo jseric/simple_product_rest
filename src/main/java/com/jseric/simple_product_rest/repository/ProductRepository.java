@@ -10,4 +10,8 @@ public interface ProductRepository extends SoftDeleteRepository<Product, Long> {
 
     @Query("SELECT COUNT(p.id) FROM Product p WHERE p.code = ?1 AND p.deleted IS NULL")
     long countByCode(final String code);
+
+    default boolean doesExistByCode(final String code) {
+        return countByCode(code) > 0;
+    }
 }
