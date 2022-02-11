@@ -27,7 +27,7 @@ public class ProductController {
     }
 
 
-    @PostMapping()
+    @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<CreateProductResponse> createNewProduct(@RequestBody final CreateProductRequest reqBody) {
         log.info("New POST Request:: " + BASE_CONTROLLER_PATH);
         log.debug("Request body: " + reqBody);
