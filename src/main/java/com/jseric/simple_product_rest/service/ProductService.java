@@ -78,8 +78,8 @@ public class ProductService {
                 requestData.getIsAvailable());
 
         // Save product
+        log.info("Saving new product");
         try {
-            log.info("Saving new product");
             product = productRepository.save(product);
         } catch (final Exception e) {
             log.error("Error ocurred while saving product: " + e.getMessage());
@@ -157,8 +157,8 @@ public class ProductService {
 
 
         // Save product
+        log.info("Saving updated product");
         try {
-            log.info("Saving updated product");
             product = productRepository.save(product);
         } catch (final Exception e) {
             log.error("Error ocurred while updating product: " + e.getMessage());
