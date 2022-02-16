@@ -2,6 +2,7 @@ package com.jseric.simple_product_rest.controller;
 
 import com.jseric.simple_product_rest.model.fe.CreateProductRequest;
 import com.jseric.simple_product_rest.model.fe.CreateProductResponse;
+import com.jseric.simple_product_rest.model.fe.FetchProductResponse;
 import com.jseric.simple_product_rest.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -73,5 +75,19 @@ public class ProductController {
         log.info("Returning response: " + rspStatus);
 
         return new ResponseEntity<>(rspStatus);
+    }
+
+    @GetMapping(produces = {"application/json"})
+    public ResponseEntity<FetchProductResponse> fetchAll() {
+        log.info("New GET Request:: " + BASE_CONTROLLER_PATH);
+
+        final FetchProductResponse rspBody = productService.fetchAllProducts();
+        final HttpStatus rspStatus = StringUtils.isEmpty(rspBody.getErrorMessage()) ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        log.info("Returning response: " + rspStatus);
+        if (rspBody != null) {
+            log.debug("Response body: " + rspBody);
+        }
+        return new ResponseEntity<>(rspBody, rspStatus);
     }
 }

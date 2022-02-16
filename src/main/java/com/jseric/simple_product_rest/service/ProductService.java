@@ -2,13 +2,16 @@ package com.jseric.simple_product_rest.service;
 
 import com.jseric.simple_product_rest.model.fe.CreateProductRequest;
 import com.jseric.simple_product_rest.model.fe.CreateProductResponse;
+import com.jseric.simple_product_rest.model.fe.FetchProductResponse;
 import com.jseric.simple_product_rest.model.fe.ProductWrapper;
 import com.jseric.simple_product_rest.model.product.Product;
 import com.jseric.simple_product_rest.repository.ProductRepository;
 import com.jseric.simple_product_rest.service.hnb.CurrencyConversionService;
 import com.jseric.simple_product_rest.service.validation.ProductValidationService;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -201,5 +204,29 @@ public class ProductService {
         }
 
         return true;
+    }
+
+    /**
+     * Fetch all Products
+     * @return {@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}
+     */
+    public FetchProductResponse fetchAllProducts() {
+        final FetchProductResponse rspBody = new FetchProductResponse();
+
+        // Fetch products
+        log.info("Fetching all products");
+        List<Product> products = null;
+        try {
+            products = productRepository.findAll();
+        } catch (final Exception e) {
+            log.error("Error while fetching products: " + e.getMessage());
+            rspBody.setErrorMessage("Error fetching products");
+            return rspBody;
+        }
+
+        // Convert Product list to ProductWrapper list
+        rspBody.setProducts(products.stream().map(ProductWrapper::new).collect(Collectors.toList()));
+
+        return rspBody;
     }
 }
