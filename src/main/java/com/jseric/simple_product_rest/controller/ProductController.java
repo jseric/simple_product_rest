@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -60,5 +61,17 @@ public class ProductController {
             log.debug("Response body: " + rspBody);
         }
         return new ResponseEntity<>(rspBody, rspStatus);
+    }
+
+    @DeleteMapping(value = "/{productId}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable String productId) {
+        log.info("New DELETE Request:: " + BASE_CONTROLLER_PATH + "/id");
+        log.debug("Product ID: " + productId);
+
+        final boolean result = productService.deleteProduct(productId);
+        final HttpStatus rspStatus = result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+        log.info("Returning response: " + rspStatus);
+
+        return new ResponseEntity<>(rspStatus);
     }
 }

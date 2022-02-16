@@ -169,4 +169,37 @@ public class ProductService {
         rspBody.setProduct(new ProductWrapper(product));
         return rspBody;
     }
+
+    /**
+     * Delete Product
+     * @param productId Product ID (in {@link java.lang.String} format)
+     * @return Action result
+     */
+    public boolean deleteProduct(final String productId) {
+        Long id = null;
+        try {
+            id = Long.parseLong(productId);
+        } catch (final NumberFormatException e) {
+            log.error("productId is not a number!");
+            return false;
+        }
+
+        // Fetch product
+        final Optional<Product> productOptional = productRepository.findById(id);
+        if (!productOptional.isPresent()) {
+            log.info("Product with ID not found");
+            return false;
+        }
+
+        // Delete product
+        log.info("Deleting product");
+        try {
+            productRepository.deleteById(id);
+        } catch (final Exception e) {
+            log.error("Error ocurred while updating product: " + e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
 }
