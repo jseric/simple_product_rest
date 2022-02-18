@@ -152,13 +152,12 @@ public class ProductService {
 
         // Update product data
         Product product = productOptional.get();
-        product.setCode(requestData.getCode());
-        product.setName(requestData.getName());
-        product.setPriceHrk(requestData.getPriceHrk());
-        product.setPriceEur(priceEur);
-        product.setDescription(requestData.getDescription());
-        product.setIsAvailable(requestData.getIsAvailable());
-
+        product.setCode(requestData.getCode())
+                .setName(requestData.getName())
+                .setPriceHrk(requestData.getPriceHrk())
+                .setPriceEur(priceEur)
+                .setDescription(requestData.getDescription())
+                .setIsAvailable(requestData.getIsAvailable());
 
         // Save product
         log.info("Saving updated product");
