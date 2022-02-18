@@ -49,7 +49,7 @@ public class ProductController {
 
     @PutMapping(value = "/{productId}", consumes={"application/json"}, produces={"application/json"})
     public ResponseEntity<CreateProductResponse> updateProduct(
-            @PathVariable String productId,
+            @PathVariable final String productId,
             @RequestBody final CreateProductRequest reqBody) {
         log.info("New PUT Request:: " + BASE_CONTROLLER_PATH + "/id");
         log.debug("Product ID: " + productId);
@@ -66,7 +66,7 @@ public class ProductController {
     }
 
     @DeleteMapping(value = "/{productId}")
-    public ResponseEntity<Object> deleteProduct(@PathVariable String productId) {
+    public ResponseEntity<Object> deleteProduct(@PathVariable final String productId) {
         log.info("New DELETE Request:: " + BASE_CONTROLLER_PATH + "/id");
         log.debug("Product ID: " + productId);
 
@@ -84,6 +84,21 @@ public class ProductController {
         final FetchProductResponse rspBody = productService.fetchAllProducts();
         final HttpStatus rspStatus = StringUtils.isEmpty(rspBody.getErrorMessage()) ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
 
+        log.info("Returning response: " + rspStatus);
+        if (rspBody != null) {
+            log.debug("Response body: " + rspBody);
+        }
+        return new ResponseEntity<>(rspBody, rspStatus);
+    }
+
+    @GetMapping(value = "/{productId}", produces = {"application/json"})
+    public ResponseEntity<FetchProductResponse> fetchById(@PathVariable final String productId) {
+        log.info("New GET Request:: " + BASE_CONTROLLER_PATH + "/id");
+        log.debug("Product ID: " + productId);
+
+        final FetchProductResponse rspBody = productService.fetchProductById(productId);
+
+        final HttpStatus rspStatus = rspBody.getProducts().size() > 0 ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         log.info("Returning response: " + rspStatus);
         if (rspBody != null) {
             log.debug("Response body: " + rspBody);

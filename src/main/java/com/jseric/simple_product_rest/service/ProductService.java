@@ -9,6 +9,7 @@ import com.jseric.simple_product_rest.repository.ProductRepository;
 import com.jseric.simple_product_rest.service.hnb.CurrencyConversionService;
 import com.jseric.simple_product_rest.service.validation.ProductValidationService;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -226,6 +227,33 @@ public class ProductService {
 
         // Convert Product list to ProductWrapper list
         rspBody.setProducts(products.stream().map(ProductWrapper::new).collect(Collectors.toList()));
+
+        return rspBody;
+    }
+
+    /**
+     * Fetch Product by ID
+     * @param productId Product ID (in {@link java.lang.String} format)
+     * @return {@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}
+     */
+    public FetchProductResponse fetchProductById(final String productId) {
+        final FetchProductResponse rspBody = new FetchProductResponse();
+
+        Long id = null;
+        try {
+            id = Long.parseLong(productId);
+        } catch (final NumberFormatException e) {
+            return rspBody;
+        }
+
+        // Fetch product
+        final Optional<Product> productOptional = productRepository.findById(id);
+        if (!productOptional.isPresent()) {
+            log.debug("Product with ID not found");
+            return rspBody;
+        }
+
+        rspBody.setProducts(Arrays.asList(new ProductWrapper(productOptional.get())));
 
         return rspBody;
     }
