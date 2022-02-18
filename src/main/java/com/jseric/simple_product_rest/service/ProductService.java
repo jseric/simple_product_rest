@@ -86,7 +86,7 @@ public class ProductService {
         try {
             product = productRepository.save(product);
         } catch (final Exception e) {
-            log.error("Error ocurred while saving product: " + e.getMessage());
+            log.error("Error occurred while saving product: " + e.getMessage());
             rspBody.setErrorMessage("product was not saved");
             return rspBody;
         }
@@ -200,7 +200,7 @@ public class ProductService {
         try {
             productRepository.deleteById(id);
         } catch (final Exception e) {
-            log.error("Error ocurred while updating product: " + e.getMessage());
+            log.error("Error occurred while updating product: " + e.getMessage());
             return false;
         }
 
