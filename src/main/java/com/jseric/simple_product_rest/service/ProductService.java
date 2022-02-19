@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -37,27 +39,27 @@ public class ProductService {
     /**
      * Create and save new Product
      * @param reqBody {@link com.jseric.simple_product_rest.model.fe.CreateProductRequest}
-     * @return {@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}
+     * @return {@link org.springframework.http.ResponseEntity}&lt;{@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}&gt;
      */
-    public CreateProductResponse createNewProduct(final CreateProductRequest reqBody) {
+    public ResponseEntity<CreateProductResponse> createAndSave(final CreateProductRequest reqBody) {
         final CreateProductResponse rspBody = new CreateProductResponse();
 
         if (reqBody == null || reqBody.getProduct() == null) {
             log.error("Request body is empty!");
             rspBody.setErrorMessage("request body is empty");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
 
         final ProductWrapper requestData = reqBody.getProduct();
 
         // Validate data
         log.info("Validating new Product data");
-        final String errorMessage = productValidationService.validateCreateNewProductRequest(requestData);
+        final String errorMessage = productValidationService.validateCreateUpdateRequest(requestData);
         if (!errorMessage.isEmpty()) {
             log.info("Data validation failed. Errors exist.");
             log.trace("errorMessage :: " + errorMessage);
             rspBody.setErrorMessage(errorMessage);
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
 
         // Check that code is unique (i.e. it doesn't already exist in system)
@@ -65,7 +67,7 @@ public class ProductService {
         if (productRepository.doesExistByCode(requestData.getCode())) {
             log.info("Code is not unique. Another object with same code field was found");
             rspBody.setErrorMessage("another object with same code field already exists in system;");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.CONFLICT);
         }
 
         // Fetch price in EUR currency
@@ -83,32 +85,34 @@ public class ProductService {
 
         // Save product
         log.info("Saving new product");
+        log.debug(product.toString());
         try {
             product = productRepository.save(product);
         } catch (final Exception e) {
             log.error("Error occurred while saving product: " + e.getMessage());
             rspBody.setErrorMessage("product was not saved");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         rspBody.setProduct(new ProductWrapper(product));
-        return rspBody;
+        return new ResponseEntity<>(rspBody, HttpStatus.CREATED);
     }
 
     /**
      * Update existing Product
      * @param productId Product ID (in {@link java.lang.String} format)
      * @param reqBody {@link com.jseric.simple_product_rest.model.fe.CreateProductRequest}
-     * @return {@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}
+     * @return {@link org.springframework.http.ResponseEntity}&lt;{@link com.jseric.simple_product_rest.model.fe.CreateProductResponse}&gt;
      */
-    public CreateProductResponse updateProduct(final String productId, final CreateProductRequest reqBody) {
+    public ResponseEntity<CreateProductResponse> update(final String productId, final CreateProductRequest reqBody) {
         final CreateProductResponse rspBody = new CreateProductResponse();
 
         if (reqBody == null || reqBody.getProduct() == null) {
             log.error("Request body is empty!");
             rspBody.setErrorMessage("request body is empty");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
+
         final ProductWrapper requestData = reqBody.getProduct();
 
         Long id = null;
@@ -117,17 +121,17 @@ public class ProductService {
         } catch (final NumberFormatException e) {
             log.error("productId is not a number!");
             rspBody.setErrorMessage("invalid productId");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
         // Validate data
         log.info("Validating Product data");
-        final String errorMessage = productValidationService.validateCreateNewProductRequest(requestData);
+        final String errorMessage = productValidationService.validateCreateUpdateRequest(requestData);
         if (!errorMessage.isEmpty()) {
             log.info("Data validation failed. Errors exist.");
             log.trace("errorMessage :: " + errorMessage);
             rspBody.setErrorMessage(errorMessage);
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
 
         // Check that code is unique (i.e. it doesn't already exist in system)
@@ -135,7 +139,7 @@ public class ProductService {
         if (productRepository.doesExistByCode(requestData.getCode(), id)) {
             log.info("Code is not unique. Another object with same code field was found");
             rspBody.setErrorMessage("another object with same code field already exists in system;");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.CONFLICT);
         }
 
         // Fetch price in EUR currency
@@ -145,9 +149,9 @@ public class ProductService {
         // Fetch product
         final Optional<Product> productOptional = productRepository.findById(id);
         if (!productOptional.isPresent()) {
-            log.warn("Product with ID not found");
+            log.warn("Product with ID = " + id + " not found");
             rspBody.setErrorMessage("product was not found");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
         // Update product data
@@ -161,37 +165,38 @@ public class ProductService {
 
         // Save product
         log.info("Saving updated product");
+        log.debug(product.toString());
         try {
             product = productRepository.save(product);
         } catch (final Exception e) {
             log.error("Error ocurred while updating product: " + e.getMessage());
             rspBody.setErrorMessage("updated product was not saved");
-            return rspBody;
+            return new ResponseEntity<>(rspBody, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         rspBody.setProduct(new ProductWrapper(product));
-        return rspBody;
+        return new ResponseEntity<>(rspBody, HttpStatus.OK);
     }
 
     /**
      * Delete Product
      * @param productId Product ID (in {@link java.lang.String} format)
-     * @return Action result
+     * @return {@link org.springframework.http.ResponseEntity}&lt;&gt;
      */
-    public boolean deleteProduct(final String productId) {
+    public ResponseEntity<Object> delete(final String productId) {
         Long id = null;
         try {
             id = Long.parseLong(productId);
         } catch (final NumberFormatException e) {
             log.error("productId is not a number!");
-            return false;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // Fetch product
         final Optional<Product> productOptional = productRepository.findById(id);
         if (!productOptional.isPresent()) {
             log.info("Product with ID not found");
-            return false;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // Delete product
@@ -199,18 +204,18 @@ public class ProductService {
         try {
             productRepository.deleteById(id);
         } catch (final Exception e) {
-            log.error("Error occurred while updating product: " + e.getMessage());
-            return false;
+            log.error("Error occurred while deleting product: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return true;
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
      * Fetch all Products
-     * @return {@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}
+     * @return {@link org.springframework.http.ResponseEntity}&lt;{@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}&gt;
      */
-    public FetchProductResponse fetchAllProducts() {
+    public ResponseEntity<FetchProductResponse> fetchAll() {
         final FetchProductResponse rspBody = new FetchProductResponse();
 
         // Fetch products
@@ -220,40 +225,41 @@ public class ProductService {
             products = productRepository.findAll();
         } catch (final Exception e) {
             log.error("Error while fetching products: " + e.getMessage());
-            rspBody.setErrorMessage("Error fetching products");
-            return rspBody;
+            rspBody.setErrorMessage("error fetching products");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         // Convert Product list to ProductWrapper list
         rspBody.setProducts(products.stream().map(ProductWrapper::new).collect(Collectors.toList()));
 
-        return rspBody;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
      * Fetch Product by ID
      * @param productId Product ID (in {@link java.lang.String} format)
-     * @return {@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}
+     * @return {@link org.springframework.http.ResponseEntity}&lt;{@link com.jseric.simple_product_rest.model.fe.FetchProductResponse}&gt;
      */
-    public FetchProductResponse fetchProductById(final String productId) {
+    public ResponseEntity<FetchProductResponse> fetchById(final String productId) {
         final FetchProductResponse rspBody = new FetchProductResponse();
 
         Long id = null;
         try {
             id = Long.parseLong(productId);
         } catch (final NumberFormatException e) {
-            return rspBody;
+            log.error("productId is not a number!");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // Fetch product
         final Optional<Product> productOptional = productRepository.findById(id);
         if (!productOptional.isPresent()) {
             log.debug("Product with ID not found");
-            return rspBody;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         rspBody.setProducts(Arrays.asList(new ProductWrapper(productOptional.get())));
 
-        return rspBody;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

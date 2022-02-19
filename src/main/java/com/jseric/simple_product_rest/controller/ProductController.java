@@ -5,9 +5,7 @@ import com.jseric.simple_product_rest.model.fe.CreateProductResponse;
 import com.jseric.simple_product_rest.model.fe.FetchProductResponse;
 import com.jseric.simple_product_rest.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,14 +35,11 @@ public class ProductController {
         log.info("New POST Request:: " + BASE_CONTROLLER_PATH);
         log.debug("Request body: " + reqBody);
 
-        final CreateProductResponse rspBody = productService.createNewProduct(reqBody);
-        final HttpStatus rspStatus = StringUtils.isEmpty(rspBody.getErrorMessage()) ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
+        final ResponseEntity<CreateProductResponse> rsp = productService.createAndSave(reqBody);
 
-        log.info("Returning response: " + rspStatus);
-        if (rspBody != null) {
-            log.debug("Response body: " + rspBody);
-        }
-        return new ResponseEntity<>(rspBody, rspStatus);
+        log.info("Response status: " + rsp.getStatusCode());
+        log.debug("Response body: " + rsp.getBody());
+        return rsp;
     }
 
     @PutMapping(value = "/{productId}", consumes={"application/json"}, produces={"application/json"})
@@ -55,14 +50,11 @@ public class ProductController {
         log.debug("Product ID: " + productId);
         log.debug("Request body: " + reqBody);
 
-        final CreateProductResponse rspBody = productService.updateProduct(productId, reqBody);
-        final HttpStatus rspStatus = StringUtils.isEmpty(rspBody.getErrorMessage()) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        final ResponseEntity<CreateProductResponse> rsp = productService.update(productId, reqBody);
 
-        log.info("Returning response: " + rspStatus);
-        if (rspBody != null) {
-            log.debug("Response body: " + rspBody);
-        }
-        return new ResponseEntity<>(rspBody, rspStatus);
+        log.info("Response status: " + rsp.getStatusCode());
+        log.debug("Response body: " + rsp.getBody());
+        return rsp;
     }
 
     @DeleteMapping(value = "/{productId}")
@@ -70,25 +62,21 @@ public class ProductController {
         log.info("New DELETE Request:: " + BASE_CONTROLLER_PATH + "/id");
         log.debug("Product ID: " + productId);
 
-        final boolean result = productService.deleteProduct(productId);
-        final HttpStatus rspStatus = result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
-        log.info("Returning response: " + rspStatus);
+        final ResponseEntity<Object> rsp = productService.delete(productId);
 
-        return new ResponseEntity<>(rspStatus);
+        log.info("Response status: " + rsp.getStatusCode());
+        return rsp;
     }
 
     @GetMapping(produces = {"application/json"})
     public ResponseEntity<FetchProductResponse> fetchAll() {
         log.info("New GET Request:: " + BASE_CONTROLLER_PATH);
 
-        final FetchProductResponse rspBody = productService.fetchAllProducts();
-        final HttpStatus rspStatus = StringUtils.isEmpty(rspBody.getErrorMessage()) ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
+        final ResponseEntity<FetchProductResponse> rsp = productService.fetchAll();
 
-        log.info("Returning response: " + rspStatus);
-        if (rspBody != null) {
-            log.debug("Response body: " + rspBody);
-        }
-        return new ResponseEntity<>(rspBody, rspStatus);
+        log.info("Response status: " + rsp.getStatusCode());
+        log.debug("Response body: " + rsp.getBody());
+        return rsp;
     }
 
     @GetMapping(value = "/{productId}", produces = {"application/json"})
@@ -96,13 +84,10 @@ public class ProductController {
         log.info("New GET Request:: " + BASE_CONTROLLER_PATH + "/id");
         log.debug("Product ID: " + productId);
 
-        final FetchProductResponse rspBody = productService.fetchProductById(productId);
+        final ResponseEntity<FetchProductResponse> rsp = productService.fetchById(productId);
 
-        final HttpStatus rspStatus = rspBody.getProducts().size() > 0 ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        log.info("Returning response: " + rspStatus);
-        if (rspBody != null) {
-            log.debug("Response body: " + rspBody);
-        }
-        return new ResponseEntity<>(rspBody, rspStatus);
+        log.info("Response status: " + rsp.getStatusCode());
+        log.debug("Response body: " + rsp.getBody());
+        return rsp;
     }
 }

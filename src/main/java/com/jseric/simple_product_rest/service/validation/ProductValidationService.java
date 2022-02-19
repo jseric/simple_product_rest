@@ -17,12 +17,12 @@ public class ProductValidationService {
     }
 
     /**
-     * Validate body of new product request
+     * Validate body of create new and update existing product request
      * @param requestBody {@link com.jseric.simple_product_rest.model.fe.ProductWrapper} object
      * @return String containing errors (if they exist). Empty string if no errors exist.
      * @throws NullPointerException if requestBody is null
      */
-    public String validateCreateNewProductRequest(final ProductWrapper requestBody) throws NullPointerException {
+    public String validateCreateUpdateRequest(final ProductWrapper requestBody) throws NullPointerException {
         if (requestBody == null) {
             throw new NullPointerException("Request body is null");
         }
