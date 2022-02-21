@@ -47,7 +47,7 @@ public class ProductWrapper implements Serializable {
     private String description;
 
     @JsonProperty("isAvailable")
-    private Boolean isAvailable = false;
+    private Boolean isAvailable;
 
     public ProductWrapper(final Product product) {
         this.id = product.getId();
