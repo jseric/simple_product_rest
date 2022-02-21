@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -112,8 +113,13 @@ public class ProductService {
             rspBody.setErrorMessage("request body is empty");
             return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
-
         final ProductWrapper requestData = reqBody.getProduct();
+
+        if (StringUtils.isEmpty(productId)) {
+            log.debug("productId is empty");
+            rspBody.setErrorMessage("productId is empty");
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
+        }
 
         Long id = null;
         try {
@@ -184,6 +190,11 @@ public class ProductService {
      * @return {@link org.springframework.http.ResponseEntity}&lt;&gt;
      */
     public ResponseEntity<Object> delete(final String productId) {
+        if (StringUtils.isEmpty(productId)) {
+            log.debug("productId is empty");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         Long id = null;
         try {
             id = Long.parseLong(productId);
@@ -242,6 +253,12 @@ public class ProductService {
      */
     public ResponseEntity<FetchProductResponse> fetchById(final String productId) {
         final FetchProductResponse rspBody = new FetchProductResponse();
+
+        if (StringUtils.isEmpty(productId)) {
+            log.debug("productId is empty");
+            rspBody.setErrorMessage("productId is empty");
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
+        }
 
         Long id = null;
         try {
