@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 public class HnbCommunicator {
-    private static final String HNB_API_URI = "https://api.hnb.hr/tecajn/v1?";
+    @Value("${com.jseric.simple_product_rest.hnb.uri}")
+    private String HNB_API_URI;
 
     private static final String CURRENCY_CODE_PARAM = "valuta";
     private static final String DATE_PARAM = "datum";
