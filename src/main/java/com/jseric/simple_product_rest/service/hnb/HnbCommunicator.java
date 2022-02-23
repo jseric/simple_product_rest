@@ -54,7 +54,15 @@ public class HnbCommunicator {
 
         log.info("Sending a GET request to " + uri);
         final RestTemplate restTemplate = new RestTemplate();
-        final ResponseEntity<String> response = restTemplate.getForEntity(uri.toString(), String.class);
+
+        ResponseEntity<String> response;
+        try {
+             response = restTemplate.getForEntity(uri.toString(), String.class);
+        } catch (final Exception e) {
+            log.error("Exception thrown when sending a GET request to " + uri + ": " + e.getMessage());
+            return null;
+        }
+
         return parseReponseObject(response);
     }
 
