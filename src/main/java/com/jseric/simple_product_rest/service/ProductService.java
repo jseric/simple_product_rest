@@ -47,7 +47,7 @@ public class ProductService {
 
         if (reqBody == null || reqBody.getProduct() == null) {
             log.error("Request body is empty!");
-            rspBody.setErrorMessage("request body is empty");
+            rspBody.setErrorMessage("request body is empty;");
             return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
 
@@ -87,13 +87,7 @@ public class ProductService {
         // Save product
         log.info("Saving new product");
         log.debug(product.toString());
-        try {
-            product = productRepository.save(product);
-        } catch (final Exception e) {
-            log.error("Error occurred while saving product: " + e.getMessage());
-            rspBody.setErrorMessage("product was not saved");
-            return new ResponseEntity<>(rspBody, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        product = productRepository.save(product);
 
         rspBody.setProduct(new ProductWrapper(product));
         return new ResponseEntity<>(rspBody, HttpStatus.CREATED);
@@ -110,14 +104,14 @@ public class ProductService {
 
         if (reqBody == null || reqBody.getProduct() == null) {
             log.error("Request body is empty!");
-            rspBody.setErrorMessage("request body is empty");
+            rspBody.setErrorMessage("request body is empty;");
             return new ResponseEntity<>(rspBody, HttpStatus.BAD_REQUEST);
         }
         final ProductWrapper requestData = reqBody.getProduct();
 
         if (StringUtils.isEmpty(productId)) {
             log.debug("productId is empty");
-            rspBody.setErrorMessage("productId is empty");
+            rspBody.setErrorMessage("productId is empty;");
             return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
@@ -126,7 +120,7 @@ public class ProductService {
             id = Long.parseLong(productId);
         } catch (final NumberFormatException e) {
             log.error("productId is not a number!");
-            rspBody.setErrorMessage("invalid productId");
+            rspBody.setErrorMessage("invalid productId;");
             return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
@@ -156,7 +150,7 @@ public class ProductService {
         final Optional<Product> productOptional = productRepository.findById(id);
         if (!productOptional.isPresent()) {
             log.warn("Product with ID = " + id + " not found");
-            rspBody.setErrorMessage("product was not found");
+            rspBody.setErrorMessage("product was not found;");
             return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
@@ -172,13 +166,7 @@ public class ProductService {
         // Save product
         log.info("Saving updated product");
         log.debug(product.toString());
-        try {
-            product = productRepository.save(product);
-        } catch (final Exception e) {
-            log.error("Error ocurred while updating product: " + e.getMessage());
-            rspBody.setErrorMessage("updated product was not saved");
-            return new ResponseEntity<>(rspBody, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        product = productRepository.save(product);
 
         rspBody.setProduct(new ProductWrapper(product));
         return new ResponseEntity<>(rspBody, HttpStatus.OK);
@@ -212,12 +200,7 @@ public class ProductService {
 
         // Delete product
         log.info("Deleting product");
-        try {
-            productRepository.deleteById(id);
-        } catch (final Exception e) {
-            log.error("Error occurred while deleting product: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        productRepository.deleteById(id);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -231,19 +214,12 @@ public class ProductService {
 
         // Fetch products
         log.info("Fetching all products");
-        List<Product> products = null;
-        try {
-            products = productRepository.findAll();
-        } catch (final Exception e) {
-            log.error("Error while fetching products: " + e.getMessage());
-            rspBody.setErrorMessage("error fetching products");
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        final List<Product> products = productRepository.findAll();
 
         // Convert Product list to ProductWrapper list
         rspBody.setProducts(products.stream().map(ProductWrapper::new).collect(Collectors.toList()));
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(rspBody, HttpStatus.OK);
     }
 
     /**
@@ -256,7 +232,7 @@ public class ProductService {
 
         if (StringUtils.isEmpty(productId)) {
             log.debug("productId is empty");
-            rspBody.setErrorMessage("productId is empty");
+            rspBody.setErrorMessage("productId is empty;");
             return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
@@ -265,18 +241,18 @@ public class ProductService {
             id = Long.parseLong(productId);
         } catch (final NumberFormatException e) {
             log.error("productId is not a number!");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
         // Fetch product
         final Optional<Product> productOptional = productRepository.findById(id);
         if (!productOptional.isPresent()) {
             log.debug("Product with ID not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(rspBody, HttpStatus.NOT_FOUND);
         }
 
         rspBody.setProducts(Arrays.asList(new ProductWrapper(productOptional.get())));
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(rspBody, HttpStatus.OK);
     }
 }
