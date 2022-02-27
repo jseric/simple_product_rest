@@ -18,6 +18,10 @@ public class CurrencyConversionService {
         this.hnbCommunicator = hnbCommunicator;
     }
 
+    public CurrencyConversionService() {
+        hnbCommunicator = new HnbCommunicator();
+    }
+
     /**
      * Convert value in HRK currency to price in EUR currency.
      * Conversion rate is retrieved from HNB API.
