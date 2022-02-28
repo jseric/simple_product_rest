@@ -1,9 +1,7 @@
 package com.jseric.simple_product_rest.service;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.jseric.simple_product_rest.mock.WireMockManager;
 import com.jseric.simple_product_rest.model.fe.CreateProductRequest;
 import com.jseric.simple_product_rest.model.fe.CreateProductResponse;
 import com.jseric.simple_product_rest.model.fe.FetchProductResponse;
@@ -31,7 +29,6 @@ import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest
@@ -109,15 +106,12 @@ class ProductServiceTest {
         when(productRepository.doesExistByCode(VALID_CODE2)).thenReturn(true);
         when(productRepository.doesExistByCode(VALID_CODE3)).thenReturn(false);
 
-        stubFor(get("/tecajn/v1?valuta=EUR").willReturn(aResponse()
-                    .withHeader("Content-type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody("[{\"Broj tečajnice\":\"37\",\"Datum primjene\":\"01.01.2022\",\"Država\":\"EMU\",\"Šifra " +
-                                      "valute\":\"978\",\"Valuta\":\"EUR\",\"Jedinica\":1,\"Kupovni za devize\":\"7,500000\"," +
-                                      "\"Srednji za devize\":\"7,500000\",\"7,500000\":\"7,500000\"}]")));
+        WireMockManager.startHnbEurStub();
     }
 
     @AfterEach
     void tearDown() {
+        WireMockManager.stopHnbEurStub();
     }
 
     @Test
